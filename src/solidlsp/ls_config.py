@@ -154,6 +154,10 @@ class Language(str, Enum):
     """Phpactor language server for PHP (instead of Intelephense, which is the default).
     Requires PHP 8.1+ on the system. Fully open-source (MIT license).
     """
+    ELIXIR_DEXTER = "elixir_dexter"
+    """Dexter language server for Elixir (instead of Expert, which is the default).
+    Requires the ``dexter`` binary on PATH (https://github.com/remoteoss/dexter).
+    """
     MARKDOWN = "markdown"
     """Marksman language server for Markdown (experimental).
     Must be explicitly specified as the main language, not auto-detected.
@@ -247,6 +251,7 @@ class Language(str, Enum):
             self.CSHARP_OMNISHARP,
             self.RUBY_SOLARGRAPH,
             self.PHP_PHPACTOR,
+            self.ELIXIR_DEXTER,
             self.MARKDOWN,
             self.YAML,
             self.JSON,
@@ -389,7 +394,7 @@ class Language(str, Enum):
                 return FilenameMatcher(".pl", ".pm", ".t")
             case self.CLOJURE:
                 return FilenameMatcher(".clj", ".cljs", ".cljc", ".edn")  # codespell:ignore edn
-            case self.ELIXIR:
+            case self.ELIXIR | self.ELIXIR_DEXTER:
                 return FilenameMatcher(".ex", ".exs")
             case self.ELM:
                 return FilenameMatcher(".elm")
@@ -607,6 +612,10 @@ class Language(str, Enum):
                 from solidlsp.language_servers.elixir_tools.elixir_tools import ElixirTools
 
                 return ElixirTools
+            case self.ELIXIR_DEXTER:
+                from solidlsp.language_servers.dexter_language_server import DexterLanguageServer
+
+                return DexterLanguageServer
             case self.ELM:
                 from solidlsp.language_servers.elm_language_server import ElmLanguageServer
 
