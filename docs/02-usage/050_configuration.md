@@ -467,24 +467,14 @@ Supported settings:
 
 #### Elixir (Dexter)
 
-As an alternative to Expert, Serena supports [Dexter](https://github.com/remoteoss/dexter), a fast Elixir LSP
-optimized for large codebases. Set the project language to `elixir_dexter` to use it. The `dexter` binary
-must be installed and available on PATH (e.g. via `brew install dexter-lsp`), or be configured via `ls_path`.
+Serena uses [Dexter](https://github.com/remoteoss/dexter) for the language `elixir_dexter`.
 
-Supported settings (under `ls_specific_settings.elixir_dexter`):
+Supported settings:
 
 | Setting | Default | Description |
 |---|---|---|
 | `ls_path` | `null` | Path to the `dexter` executable, used instead of looking up `dexter` on PATH. |
-| `initialization_options` | `{}` | Dict forwarded to Dexter via LSP `initializationOptions` (e.g. `followDelegates`, `stdlibPath`, `debug`). |
-
-Example (in `.serena/project.yml` or `serena_config.yml`):
-
-```yaml
-ls_specific_settings:
-  elixir_dexter:
-    ls_path: "/path/to/dexter"
-```
+| `initialization_options` | `{}` | Dict forwarded to Dexter via LSP `initializationOptions`. |
 
 #### Elm
 

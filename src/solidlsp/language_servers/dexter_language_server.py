@@ -1,22 +1,10 @@
 """
 Dexter language server support for Elixir.
 
-Dexter (https://github.com/remoteoss/dexter) is a fast, full-featured Elixir
-language server optimized for large codebases. Unlike Expert (the default
-Elixir language server, see ``elixir_tools``), Dexter parses source files
-directly as text and stores its index in SQLite, so it does not need to
-compile the project before answering requests.
-
-Installation
-------------
-The ``dexter`` binary must be installed manually and be available on PATH
-(or configured via ``ls_specific_settings.elixir_dexter.ls_path``):
-
-- Homebrew: ``brew install dexter-lsp``
-- Mise: ``mise use -g aqua:remoteoss/dexter@latest``
-- ASDF: ``asdf plugin add dexter https://github.com/remoteoss/dexter.git && asdf install dexter latest``
-
-Official documentation: https://github.com/remoteoss/dexter
+Dexter (https://github.com/remoteoss/dexter) is a fast Elixir language server optimized for
+large codebases, available as an alternative to Expert (the default for the language ``elixir``).
+The ``dexter`` binary must be installed manually (e.g. ``brew install dexter-lsp``) and be
+available on PATH, or configured via ``ls_specific_settings.elixir_dexter.ls_path``.
 """
 
 import logging

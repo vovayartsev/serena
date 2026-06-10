@@ -156,9 +156,7 @@ class Language(str, Enum):
     """
     ELIXIR_DEXTER = "elixir_dexter"
     """Dexter language server for Elixir (instead of Expert, which is the default).
-    A fast Elixir LSP optimized for large codebases (https://github.com/remoteoss/dexter).
-    Requires the ``dexter`` binary to be installed and available on PATH
-    (or configure ``ls_path`` in ``ls_specific_settings.elixir_dexter``).
+    Requires the ``dexter`` binary on PATH (https://github.com/remoteoss/dexter).
     """
     MARKDOWN = "markdown"
     """Marksman language server for Markdown (experimental).
