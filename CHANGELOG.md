@@ -16,8 +16,6 @@ Status of the `main` branch. Changes prior to the next official version change w
   - Allow `query_project` tool to access read-only tools that are not enabled in the current configuration
 
 * Language Servers:
-  - Add support for [Dexter](https://github.com/remoteoss/dexter) as an alternative Elixir language server
-    (language `elixir_dexter`); requires the `dexter` binary on PATH (configurable via `ls_path`).
   - `typescript_vts`: Add `initialization_options` setting in `ls_specific_settings.typescript_vts`.
     The dict is forwarded to vtsls via `initializationOptions`, `workspace/didChangeConfiguration`,
     and `workspace/configuration` pulls. Enables Yarn PnP setups with `typescript.tsdk` pointing

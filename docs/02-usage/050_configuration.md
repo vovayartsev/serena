@@ -465,17 +465,6 @@ Supported settings:
 |---|---|---|
 | `expert_version` | `v0.1.0-rc.6` | Override the Expert version Serena downloads when it does not use an `expert` executable already found in PATH. |
 
-#### Elixir (Dexter)
-
-Serena uses [Dexter](https://github.com/remoteoss/dexter) for the language `elixir_dexter`.
-
-Supported settings:
-
-| Setting | Default | Description |
-|---|---|---|
-| `ls_path` | `null` | Path to the `dexter` executable, used instead of looking up `dexter` on PATH. |
-| `initialization_options` | `{}` | Dict forwarded to Dexter via LSP `initializationOptions`. |
-
 #### Elm
 
 Serena uses `@elm-tooling/elm-language-server` for Elm support.
