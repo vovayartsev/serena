@@ -16,6 +16,10 @@ Status of the `main` branch. Changes prior to the next official version change w
   - Allow `query_project` tool to access read-only tools that are not enabled in the current configuration
 
 * Language Servers:
+  - Add `elixir_dexterity`: Elixir support reading a pre-built [Dexter](https://github.com/remoteoss/dexter)
+    index (`.dexter/dexter.db`) directly — read-only, no language server process is launched. The index
+    location can be overridden via `db_path` in `ls_specific_settings.elixir_dexterity`.
+    (Replaces the short-lived `elixir_dexter` language, which launched the Dexter LSP server.)
   - `typescript_vts`: Add `initialization_options` setting in `ls_specific_settings.typescript_vts`.
     The dict is forwarded to vtsls via `initializationOptions`, `workspace/didChangeConfiguration`,
     and `workspace/configuration` pulls. Enables Yarn PnP setups with `typescript.tsdk` pointing
