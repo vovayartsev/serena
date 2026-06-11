@@ -251,19 +251,28 @@ class _DexterityLanguageServerInterface(LanguageServerInterface):
             return []
 
     @staticmethod
-    def _token_column(line_text: str, token: str) -> int:
-        """:return: the 0-based column of the first word-bounded occurrence of ``token`` in ``line_text`` (0 if not found)."""
+    def _find_token(line_text: str, token: str) -> int | None:
+        """:return: the 0-based column of the first word-bounded occurrence of ``token`` in ``line_text``, or None if not found.
+
+        Occurrences preceded by '.' (module-qualified) or ':' (atoms) are not considered matches.
+        """
         start = 0
         while True:
             idx = line_text.find(token, start)
             if idx == -1:
-                return 0
-            before_ok = idx == 0 or not (line_text[idx - 1].isalnum() or line_text[idx - 1] in "_.")
+                return None
+            before_ok = idx == 0 or not (line_text[idx - 1].isalnum() or line_text[idx - 1] in "_.:")
             after = idx + len(token)
             after_ok = after >= len(line_text) or not (line_text[after].isalnum() or line_text[after] == "_")
             if before_ok and after_ok:
                 return idx
             start = idx + 1
+
+    @classmethod
+    def _token_column(cls, line_text: str, token: str) -> int:
+        """Like :meth:`_find_token`, but returns 0 if the token is not found."""
+        col = cls._find_token(line_text, token)
+        return 0 if col is None else col
 
     def _location(self, relative_path: str, line0: int, token: str, lines: list[str] | None = None) -> dict[str, Any]:
         lines = lines if lines is not None else self._read_lines(relative_path)
@@ -317,16 +326,17 @@ class _DexterityLanguageServerInterface(LanguageServerInterface):
             unique_rows.append((module, function, arity, kind, line, params_str))
         unique_rows.sort(key=lambda row: row[4])
 
-        def make_symbol(name: str, kind: int, line0: int, end_line0: int, detail: str) -> dict[str, Any]:
+        def make_symbol(name: str, kind: int, line0: int, end_line0: int, detail: str, token: str | None = None) -> dict[str, Any]:
+            token = token if token is not None else name
             line_text = lines[line0] if 0 <= line0 < len(lines) else ""
-            col = self._token_column(line_text, name)
+            col = self._token_column(line_text, token)
             end_character = len(lines[end_line0]) if 0 <= end_line0 < len(lines) else 0
             return {
                 "name": name,
                 "kind": kind,
                 "detail": detail,
                 "range": {"start": {"line": line0, "character": 0}, "end": {"line": end_line0, "character": end_character}},
-                "selectionRange": {"start": {"line": line0, "character": col}, "end": {"line": line0, "character": col + len(name)}},
+                "selectionRange": {"start": {"line": line0, "character": col}, "end": {"line": line0, "character": col + len(token)}},
                 "children": [],
             }
 
@@ -354,7 +364,10 @@ class _DexterityLanguageServerInterface(LanguageServerInterface):
                     root_symbols.append(node)
             else:
                 detail = f"{kind} {function}/{arity}" + (f" ({params_str})" if params_str else "")
-                node = make_symbol(function, _DEF_KIND_TO_SYMBOL_KIND.get(kind, _SK_FUNCTION), line0, end_line0, detail)
+                # private functions carry a "defp " name prefix so that agents see the visibility;
+                # the selection range stays on the bare identifier
+                display_name = f"defp {function}" if kind == "defp" else function
+                node = make_symbol(display_name, _DEF_KIND_TO_SYMBOL_KIND.get(kind, _SK_FUNCTION), line0, end_line0, detail, token=function)
                 if module in module_nodes:
                     module_nodes[module]["children"].append(node)
                 else:
@@ -425,6 +438,27 @@ class _DexterityLanguageServerInterface(LanguageServerInterface):
             token = ref_function or ref_module.rsplit(".", 1)[-1]
             locations.append(self._location(ref_relative, line - 1, token))
 
+        if function:
+            # The index does not record bare local calls (e.g. `helper(x)` within the defining
+            # module, which is the only way private functions can be called), so the defining
+            # files are additionally scanned for word-bounded occurrences of the function name.
+            definition_rows = self._reader.find_definitions(module, function)
+            definition_lines_by_file: dict[str, set[int]] = {}
+            for *_, def_line, file_path in definition_rows:
+                definition_lines_by_file.setdefault(file_path, set()).add(def_line)
+            for file_path, definition_lines in definition_lines_by_file.items():
+                def_relative = self._reader.relative_for_db_path(file_path)
+                if def_relative is None:
+                    continue
+                lines = self._read_lines(def_relative)
+                for line0, line_text in enumerate(lines):
+                    if line0 + 1 in definition_lines or (def_relative, line0 + 1) in seen:
+                        continue
+                    if self._find_token(line_text, function) is None:
+                        continue
+                    seen.add((def_relative, line0 + 1))
+                    locations.append(self._location(def_relative, line0, function, lines=lines))
+
         if params.get("context", {}).get("includeDeclaration"):
             for def_module, def_function, _kind, line, file_path in self._reader.find_definitions(module, function):
                 def_relative = self._reader.relative_for_db_path(file_path)
@@ -459,6 +493,9 @@ class ElixirDexterity(SolidLanguageServer):
     strictly read-only. The index must be created and kept up to date externally,
     e.g. by the Dexter instance running in your editor or by running ``dexter init``
     (https://github.com/remoteoss/dexter).
+
+    Private functions are reported with a ``defp `` name prefix (e.g. ``defp validate``),
+    making the visibility apparent in symbol overviews.
 
     You can pass the following entries in ``ls_specific_settings["elixir_dexterity"]``:
         - db_path: Path to the ``dexter.db`` index file. By default, ``.dexter/dexter.db``

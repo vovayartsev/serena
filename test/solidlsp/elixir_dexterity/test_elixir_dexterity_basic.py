@@ -111,6 +111,22 @@ class TestElixirDexterityBasic:
         assert any(d["relativePath"] == os.path.join("lib", "services.ex") for d in definitions), definitions
 
     @pytest.mark.parametrize("language_server", [Language.ELIXIR_DEXTERITY], indirect=True)
+    def test_private_function_naming_and_references(self, language_server: SolidLanguageServer):
+        """Private functions are reported as 'defp <name>' and their references are still found."""
+        file_path = os.path.join("lib", "models.ex")
+        _, roots = language_server.request_document_symbols(file_path).get_all_symbols_and_roots()
+
+        calculate_total = _find_symbol(roots, "defp calculate_total", kind=12)
+        assert calculate_total is not None, "Private function should be named 'defp calculate_total'"
+        assert _find_symbol(roots, "calculate_total") is None, "The bare name should not be reported for private functions"
+
+        # the selection range stays on the bare identifier, so references are still resolvable from it
+        sel_start = calculate_total["selectionRange"]["start"]
+        references = language_server.request_references(file_path, sel_start["line"], sel_start["character"])
+        assert references, "Should find references to the private function calculate_total"
+        assert any(ref["relativePath"] == file_path for ref in references)
+
+    @pytest.mark.parametrize("language_server", [Language.ELIXIR_DEXTERITY], indirect=True)
     def test_symbol_ranges_cover_bodies(self, language_server: SolidLanguageServer):
         """Symbol ranges extend over the entity bodies (approximated from the index)."""
         file_path = os.path.join("lib", "models.ex")
