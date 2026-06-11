@@ -63,7 +63,8 @@ Some languages require additional installations or setup steps, as noted.
 * **CUE**
 * **Dart**
 * **Elixir**  
-  (requires Elixir installation; Expert language server is downloaded automatically)
+  (requires Elixir installation; Expert language server is downloaded automatically;
+  set language to `elixir_dexterity` to instead read a pre-built [Dexter](https://github.com/remoteoss/dexter) index (`.dexter/dexter.db`) — no language server process is launched)
 * **Elm**  
   (requires Elm compiler)
 * **Erlang**  

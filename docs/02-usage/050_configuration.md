@@ -465,6 +465,16 @@ Supported settings:
 |---|---|---|
 | `expert_version` | `v0.1.0-rc.6` | Override the Expert version Serena downloads when it does not use an `expert` executable already found in PATH. |
 
+#### Elixir (Dexterity)
+
+For the language `elixir_dexterity`, Serena reads a pre-built [Dexter](https://github.com/remoteoss/dexter) index (`.dexter/dexter.db`) directly, read-only and without launching any language server process. The index must be maintained externally, e.g. by the Dexter instance of your editor or via `dexter init`.
+
+Supported settings:
+
+| Setting | Default | Description |
+|---|---|---|
+| `db_path` | `null` | Path to the `dexter.db` index file; by default, `.dexter/dexter.db` is searched in the project root and its ancestors. |
+
 #### Elm
 
 Serena uses `@elm-tooling/elm-language-server` for Elm support.
